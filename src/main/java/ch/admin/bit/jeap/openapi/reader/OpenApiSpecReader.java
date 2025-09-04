@@ -1,23 +1,23 @@
 package ch.admin.bit.jeap.openapi.reader;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.RestClient;
+import org.springdoc.webmvc.api.OpenApiResource;
+
+import java.util.Locale;
 
 @Slf4j
-public record OpenApiSpecReader(String portNumber, String contextPath, RestClient restClient, boolean sslEnabled) {
+public record OpenApiSpecReader(OpenApiResource openApiResource) {
 
-    public String readOpenApiSpec() {
-        final String protocol = sslEnabled ? "https://" : "http://";
-        final String uri = protocol + "localhost:" + portNumber + contextPath + "/api-docs";
-        log.info("Reading OpenApiSpec from uri '{}'", uri);
-        String spec = restClient.get()
-                .uri(uri)
-                .retrieve()
-                .body(String.class);
-
+    public String readOpenApiSpec() throws JsonProcessingException {
+        HttpServletRequest req = HttpServletRequestFactory.getHttpServletRequest();
+        String spec = new String(openApiResource.openapiJson(req, "api-docs", Locale.getDefault()));
         log.info("Found OpenApiSpec: {}", spec);
         return spec;
     }
+
+
 }
 
 

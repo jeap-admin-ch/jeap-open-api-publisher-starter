@@ -5,7 +5,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
 @Slf4j
-record OpenApiSpecPublisherEventListener(OpenApiSpecPublisher openApiSpecPublisher) {
+public record OpenApiSpecPublisherEventListener(OpenApiSpecPublisher openApiSpecPublisher) {
 
     @EventListener(ApplicationReadyEvent.class)
     public void publishOpenApiSpecOnStartup() {

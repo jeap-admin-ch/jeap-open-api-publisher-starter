@@ -2,6 +2,7 @@ package ch.admin.bit.jeap.openapi.publisher;
 
 import ch.admin.bit.jeap.openapi.archrepo.client.ArchitectureRepositoryService;
 import ch.admin.bit.jeap.openapi.reader.OpenApiSpecReader;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.info.GitProperties;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-class OpenApiSpecPublisher {
+public class OpenApiSpecPublisher {
 
     static final String OPEN_API_SPEC_PUBLISHER_TASK_EXECUTOR = "openApiSpecPublisherTaskExecutor";
 
@@ -53,10 +54,9 @@ class OpenApiSpecPublisher {
         });
     }
 
-    void publishOpenApiSpec() {
+    void publishOpenApiSpec() throws JsonProcessingException {
         String openApiSpec = openApiSpecReader.readOpenApiSpec();
         ByteArrayResource resource = getByteArrayResource(openApiSpec);
-
         architectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
         log.info("Published open api spec successfully");
     }
