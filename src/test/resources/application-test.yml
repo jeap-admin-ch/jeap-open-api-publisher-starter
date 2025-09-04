@@ -1,0 +1,30 @@
+server:
+  servlet:
+    context-path: /test
+
+spring:
+  application:
+    name: test-app
+
+  security:
+    oauth2:
+      client:
+        registration:
+          archrepo-client:
+            client-id: archrepo-client
+            client-secret: secret
+            scope: openid
+            authorization-grant-type: client_credentials
+            provider: archrepo-client
+        provider:
+          archrepo-client:
+            token-uri: http://localhost:${wiremock.port}/oauth/token
+  main:
+    banner-mode: off
+
+management:
+  observations:
+    annotations:
+      enabled: true
+
+debug: true
