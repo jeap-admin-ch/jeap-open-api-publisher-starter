@@ -1,18 +1,18 @@
 package ch.admin.bit.jeap.openapi.publisher;
 
 import brave.Tracer;
-import ch.admin.bit.jeap.openapi.archrepo.client.ArchitectureRepositoryService;
+import ch.admin.bit.jeap.openapi.archrepo.client.OpenApiArchitectureRepositoryService;
 import ch.admin.bit.jeap.openapi.reader.OpenApiSpecReader;
 import ch.admin.bit.jeap.security.restclient.OAuth2ClientCredentialsRestClientInitializer;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.webmvc.api.OpenApiResource;
+import org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.info.GitProperties;
@@ -27,12 +27,13 @@ import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
- * Enabling the Open API upload to the architecture repository (archrepo) requires setting the property
+ * Enabling the OpenAPI upload to the architecture repository (archrepo) requires setting the property
  * <pre>jeap.archrepo.url</pre> to the URL of the archrepo service.
  * This autoconfiguration is can be completely disabled (for example in tests) by setting the property <pre>jeap.archrepo.enabled=false</pre>.
  */
-@AutoConfiguration(after = {DispatcherServletAutoConfiguration.class, SpringDocConfiguration.class})
+@AutoConfiguration(after = {SpringDocConfiguration.class, SpringDocWebMvcConfiguration.class})
 @EnableConfigurationProperties(ArchRepoProperties.class)
+@ConditionalOnBean(OpenApiResource.class)
 @ConditionalOnProperty(prefix = ArchRepoProperties.PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableAsync
 public class OpenApiSpecPublisherAutoConfiguration {
@@ -44,10 +45,10 @@ public class OpenApiSpecPublisherAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = ArchRepoProperties.PREFIX, name = "url")
-    public ArchitectureRepositoryService architectureRepositoryService(ClientRegistrationRepository clientRegistrationRepository,
-                                                                       OAuth2AuthorizedClientService clientService,
-                                                                       RestClient.Builder builder,
-                                                                       ArchRepoProperties properties) {
+    public OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService(ClientRegistrationRepository clientRegistrationRepository,
+                                                                                     OAuth2AuthorizedClientService clientService,
+                                                                                     RestClient.Builder builder,
+                                                                                     ArchRepoProperties properties) {
 
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(properties.getOauthClient());
         if (clientRegistration == null) {
@@ -64,7 +65,7 @@ public class OpenApiSpecPublisherAutoConfiguration {
         return HttpServiceProxyFactory
                 .builderFor(RestClientAdapter.create(restClient))
                 .build()
-                .createClient(ArchitectureRepositoryService.class);
+                .createClient(OpenApiArchitectureRepositoryService.class);
     }
 
     private OAuth2AuthorizedClientManager authorizedClientManager(ClientRegistrationRepository clientRegistrationRepository,
@@ -76,8 +77,8 @@ public class OpenApiSpecPublisherAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean({ArchitectureRepositoryService.class})
-    public OpenApiSpecPublisher openApiSpecPublisher(ArchitectureRepositoryService architectureRepositoryService,
+    @ConditionalOnBean({OpenApiArchitectureRepositoryService.class})
+    public OpenApiSpecPublisher openApiSpecPublisher(OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService,
                                                      OpenApiSpecReader openApiSpecReader,
                                                      @Value("${spring.application.name}") String applicationName,
                                                      @Autowired(required = false) BuildProperties buildProperties,
@@ -85,7 +86,7 @@ public class OpenApiSpecPublisherAutoConfiguration {
                                                      @Autowired(required = false) Tracer tracer,
                                                      @Autowired(required = false) MeterRegistry meterRegistry) {
         return new OpenApiSpecPublisher(applicationName,
-                architectureRepositoryService,
+                openApiArchitectureRepositoryService,
                 openApiSpecReader,
                 buildProperties,
                 gitProperties,

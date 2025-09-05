@@ -12,8 +12,8 @@ public class ArchRepoProperties {
     public static final String PREFIX = "jeap.archrepo";
 
     /**
-     * The URL of the archrepo to which the Open API specification will be published. If no URL is configured, the publisher will not
-     * publish the Open API specification to the archrepo at startup.
+     * The URL of the archrepo to which the OpenAPI specification will be published. If no URL is configured, the
+     * publisher will not publish the OpenAPI specification to the archrepo at startup.
      */
     private String url;
     /**
@@ -22,7 +22,8 @@ public class ArchRepoProperties {
      */
     private String oauthClient = "archrepo-client";
     /**
-     * If true (default), the publisher will send the Open API specification to the archrepo as long as an archrepo URL is set.
+     * If true (default), the publisher will send the OpenAPI specification to the archrepo as long as an archrepo
+     * URL is set.
      */
     private boolean enabled = true;
 

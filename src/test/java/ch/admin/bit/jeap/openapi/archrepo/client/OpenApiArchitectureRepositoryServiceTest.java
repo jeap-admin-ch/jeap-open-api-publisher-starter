@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest(classes = OpenApiSpecPublisherTestApplication.class)
 @EnableAutoConfiguration()
 @ActiveProfiles("test")
-class ArchitectureRepositoryServiceTest {
+class OpenApiArchitectureRepositoryServiceTest {
 
     private static final String FILE_CONTENT = "my file content";
 
@@ -36,7 +36,7 @@ class ArchitectureRepositoryServiceTest {
             .http2PlainDisabled(true));
 
     @Autowired
-    private ArchitectureRepositoryService architectureRepositoryService;
+    private OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService;
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -77,7 +77,7 @@ class ArchitectureRepositoryServiceTest {
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
 
         // When
-        assertDoesNotThrow(() -> architectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
+        assertDoesNotThrow(() -> openApiArchitectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
 
         // Then
         var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-system-component")));
@@ -110,7 +110,7 @@ class ArchitectureRepositoryServiceTest {
 
         // When & Then
         assertThrows(HttpServerErrorException.class,
-                () -> architectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
+                () -> openApiArchitectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
 
         // Verify request was made
         var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-system-component")));
@@ -131,7 +131,7 @@ class ArchitectureRepositoryServiceTest {
                         .withHeader("Content-Type", "application/json")));
 
         // When & Then
-        assertThrows(HttpClientErrorException.class, () -> architectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
+        assertThrows(HttpClientErrorException.class, () -> openApiArchitectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
 
         // Verify request was made
         var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-system-component")));

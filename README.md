@@ -1,13 +1,13 @@
-# jEAP Open API Publisher
+# jEAP OpenAPI Specification Publisher
 
-jEAP Open API Publisher is a library based on Spring Boot to publish the Open API specification of a jEAP application to the
+jEAP OpenAPI Specification Publisher is a library based on Spring Boot to publish the OpenAPI specification of a jEAP application to the
 jEAP Architecture Repository Service.
 
 * If activated by providing a valid `jeap.archrepo.url` property, it will
-   automatically publish the Open API specification to the jEAP Architecture Repository Service.
+   automatically publish the OpenAPI specification to the jEAP Architecture Repository Service.
 * The request to the Archrepo service will be authenticated using OAuth2. By default, an oauth client registration named
   `archrepo-client` is expected to be configured under `spring.security.oauth2.client.registration`.
-* The Open API specification will be read and published at application startup, on a best-effort basis. The Open API specification upload
+* The OpenAPI specification will be read and published at application startup, on a best-effort basis. The OpenAPI specification upload
    process is designed to have the least possible impact on application, i.e. it will not block the application or
    cause startup to fail if the upload fails.
 

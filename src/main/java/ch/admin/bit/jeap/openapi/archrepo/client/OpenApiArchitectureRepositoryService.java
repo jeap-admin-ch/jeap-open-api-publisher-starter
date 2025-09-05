@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.service.annotation.PostExchange;
 
-public interface ArchitectureRepositoryService {
+public interface OpenApiArchitectureRepositoryService {
 
     @PostExchange(value = "/api/openapi/{systemComponentName}", contentType = MediaType.MULTIPART_FORM_DATA_VALUE)
     void publishOpenApiSpec(@PathVariable String systemComponentName, @RequestParam String version, @RequestPart("file") Resource file);

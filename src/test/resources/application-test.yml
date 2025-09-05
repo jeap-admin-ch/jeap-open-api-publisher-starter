@@ -1,7 +1,3 @@
-server:
-  servlet:
-    context-path: /test
-
 spring:
   application:
     name: test-app
@@ -26,5 +22,3 @@ management:
   observations:
     annotations:
       enabled: true
-
-debug: true

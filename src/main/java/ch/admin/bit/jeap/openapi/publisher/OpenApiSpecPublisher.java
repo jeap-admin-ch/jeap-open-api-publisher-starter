@@ -1,6 +1,6 @@
 package ch.admin.bit.jeap.openapi.publisher;
 
-import ch.admin.bit.jeap.openapi.archrepo.client.ArchitectureRepositoryService;
+import ch.admin.bit.jeap.openapi.archrepo.client.OpenApiArchitectureRepositoryService;
 import ch.admin.bit.jeap.openapi.reader.OpenApiSpecReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,20 +21,20 @@ public class OpenApiSpecPublisher {
     private static final String SPAN_NAME = "publish-open-api-spec";
 
     private final String applicationName;
-    private final ArchitectureRepositoryService architectureRepositoryService;
+    private final OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService;
     private final OpenApiSpecReader openApiSpecReader;
     private final BuildProperties buildProperties;
     private final GitProperties gitProperties;
     private final TracingTimer tracingTimer;
 
     OpenApiSpecPublisher(String applicationName,
-                         ArchitectureRepositoryService architectureRepositoryService,
+                         OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService,
                          OpenApiSpecReader openApiSpecReader,
                          BuildProperties buildProperties,
                          GitProperties gitProperties,
                          TracingTimer tracingTimer) {
         this.applicationName = applicationName;
-        this.architectureRepositoryService = architectureRepositoryService;
+        this.openApiArchitectureRepositoryService = openApiArchitectureRepositoryService;
         this.openApiSpecReader = openApiSpecReader;
         this.buildProperties = buildProperties;
         this.gitProperties = gitProperties;
@@ -48,7 +48,7 @@ public class OpenApiSpecPublisher {
                 publishOpenApiSpec();
                 return CompletableFuture.completedFuture(null);
             } catch (Exception e) {
-                log.error("Failed to publish open api spec", e);
+                log.error("Failed to publish OpenAPI spec", e);
                 return CompletableFuture.failedFuture(e);
             }
         });
@@ -57,8 +57,8 @@ public class OpenApiSpecPublisher {
     void publishOpenApiSpec() throws JsonProcessingException {
         String openApiSpec = openApiSpecReader.readOpenApiSpec();
         ByteArrayResource resource = getByteArrayResource(openApiSpec);
-        architectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
-        log.info("Published open api spec successfully");
+        openApiArchitectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
+        log.info("Published OpenAPI specification successfully");
     }
 
     private ByteArrayResource getByteArrayResource(String openApiSpec) {

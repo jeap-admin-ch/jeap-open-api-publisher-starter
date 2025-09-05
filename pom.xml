@@ -27,7 +27,7 @@
 
     <artifactId>jeap-open-api-publisher-starter</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <parent>
         <artifactId>jeap-internal-spring-boot-parent</artifactId>
@@ -36,6 +36,8 @@
     </parent>
 
     <properties>
+        <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
+        <jeap-spring-boot-security-client-starter.version>18.0.0</jeap-spring-boot-security-client-starter.version>
         <maven.javadoc.skip>false</maven.javadoc.skip>
     </properties>
 
@@ -63,6 +65,16 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>ch.admin.bit.jeap</groupId>
+            <artifactId>jeap-spring-boot-security-client-starter</artifactId>
+            <version>${jeap-spring-boot-security-client-starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
         </dependency>
@@ -71,29 +83,11 @@
             <artifactId>brave</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>ch.admin.bit.jeap</groupId>
-            <artifactId>jeap-spring-boot-security-client-starter</artifactId>
-            <version>18.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.5</version>
-        </dependency>
-
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.9</version>
         </dependency>
 
         <!-- Test with metrics -->
@@ -110,21 +104,6 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Testcontainers -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-
-        <!-- Spring Boot Testcontainers for @ServiceConnection -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
 

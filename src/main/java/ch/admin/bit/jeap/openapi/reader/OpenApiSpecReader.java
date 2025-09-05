@@ -1,7 +1,6 @@
 package ch.admin.bit.jeap.openapi.reader;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.webmvc.api.OpenApiResource;
 
@@ -11,14 +10,9 @@ import java.util.Locale;
 public record OpenApiSpecReader(OpenApiResource openApiResource) {
 
     public String readOpenApiSpec() throws JsonProcessingException {
-        HttpServletRequest req = HttpServletRequestFactory.getHttpServletRequest();
-        String spec = new String(openApiResource.openapiJson(req, "api-docs", Locale.getDefault()));
-        log.info("Found OpenApiSpec: {}", spec);
+        String spec = new String(openApiResource.openapiJson(HttpServletRequestFactory.getHttpServletRequest(), "api-docs", Locale.getDefault()));
+        log.trace("Found OpenAPI specification content: {}", spec);
+        log.info("Found OpenAPI specification with size: {}", spec.length());
         return spec;
     }
-
-
 }
-
-
-

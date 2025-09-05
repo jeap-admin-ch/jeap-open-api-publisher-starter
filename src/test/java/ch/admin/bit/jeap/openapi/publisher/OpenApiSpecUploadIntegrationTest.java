@@ -5,8 +5,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Duration;
 
@@ -26,14 +25,12 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Disabled
 @SpringBootTest(classes = OpenApiSpecPublisherTestApplication.class)
-@Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureObservability // To test the timed annotation on the publisher method
 class OpenApiSpecUploadIntegrationTest {
 
-    private static final String FILE_CONTENT = "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"Test API\"}}";
+    private static final String FILE_CONTENT = "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"},\"servers\":[{\"url\":\"http://localhost:8080/\",\"description\":\"Generated server url\"}],\"paths\":{},\"components\":{}}";
 
     @Autowired
     private MeterRegistry meterRegistry;
@@ -49,19 +46,9 @@ class OpenApiSpecUploadIntegrationTest {
     static void configureProperties(DynamicPropertyRegistry registry) {
         wireMockServer.start();
 
-        registry.add("server.port", () -> wireMockServer.port());
-
         mockOAuthTokenResponse();
 
         // Set up mock API endpoint before Spring Boot starts
-        wireMockServer
-                .stubFor(get(urlPathEqualTo("/test/api-docs"))
-                        .willReturn(aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody(FILE_CONTENT)));
-
-
         wireMockServer.stubFor(post(urlPathEqualTo("/api/openapi/test-app"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -79,6 +66,7 @@ class OpenApiSpecUploadIntegrationTest {
     }
 
     @Test
+    @SneakyThrows
     void shouldUploadOpenApiSpecOnStartup() {
         // Wait for async publication to complete (since it's triggered by ApplicationReadyEvent)
         await()
@@ -91,11 +79,6 @@ class OpenApiSpecUploadIntegrationTest {
                 });
 
         // Verify the request was made
-        var readerRequests = wireMockServer.findAll(getRequestedFor(urlPathEqualTo("/test/api-docs")));
-        assertThat(readerRequests)
-                .withFailMessage("Expected one API call to /test/api-docs")
-                .hasSize(1);
-
         var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-app")));
         assertThat(requests)
                 .withFailMessage("Expected one API call to /api/openapi/test-app")
