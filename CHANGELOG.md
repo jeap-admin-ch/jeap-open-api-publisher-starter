@@ -10,6 +10,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Update parent from 5.14.0 to 5.15.0
+- update starter from 18.0.0 to 18.2.0
+- update springdoc-openapi from 2.8.9 to 2.8.13
 
 ## [1.1.0] - 2025-09-19
 
