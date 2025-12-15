@@ -17,6 +17,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.oauth2.client.*;
@@ -41,6 +42,11 @@ public class OpenApiSpecPublisherAutoConfiguration {
     @Bean
     public OpenApiSpecReader openApiSpecReader(OpenApiResource openApiResource) {
         return new OpenApiSpecReader(openApiResource);
+    }
+
+    @Bean
+    public BaseServerUrlReplacer baseServerUrlReplacer(Environment environment, @Value("${server.servlet.context-path:}") String contextPath, ArchRepoProperties archRepoProperties) {
+        return new BaseServerUrlReplacer(environment, contextPath, archRepoProperties);
     }
 
     @Bean
@@ -84,13 +90,16 @@ public class OpenApiSpecPublisherAutoConfiguration {
                                                      @Autowired(required = false) BuildProperties buildProperties,
                                                      @Autowired(required = false) GitProperties gitProperties,
                                                      @Autowired(required = false) Tracer tracer,
-                                                     @Autowired(required = false) MeterRegistry meterRegistry) {
-        return new OpenApiSpecPublisher(applicationName,
+                                                     @Autowired(required = false) MeterRegistry meterRegistry,
+                                                     BaseServerUrlReplacer baseServerUrlReplacer) {
+        return new OpenApiSpecPublisher(
+                applicationName,
                 openApiArchitectureRepositoryService,
                 openApiSpecReader,
                 buildProperties,
                 gitProperties,
-                new TracingTimer(tracer, meterRegistry));
+                new TracingTimer(tracer, meterRegistry),
+                baseServerUrlReplacer);
     }
 
     @Bean
