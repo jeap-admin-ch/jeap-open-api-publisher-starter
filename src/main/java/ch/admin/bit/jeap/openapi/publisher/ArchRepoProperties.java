@@ -16,15 +16,31 @@ public class ArchRepoProperties {
      * publisher will not publish the OpenAPI specification to the archrepo at startup.
      */
     private String url;
+
     /**
      * The OAuth client to use for authentication with the archrepo. A client registration with this name
      * must be configured under spring.security.oauth2.client.registration.
      */
     private String oauthClient = "archrepo-client";
+
     /**
      * If true (default), the publisher will send the OpenAPI specification to the archrepo as long as an archrepo
      * URL is set.
      */
     private boolean enabled = true;
+
+    /**
+     * If true (default), the publisher will replace the base server URL of the OpenAPI specification
+     * before publishing.
+     * Default value is true.
+     */
+    private boolean replaceBaseServerUrl = true;
+
+    /**
+     * Configuration attribute name for the FQDN of the service.
+     * Used to replace the base server URL of the OpenAPI specification before publishing.
+     * Default value is "aws.services.route53.internal_csp_fqdn".
+     */
+    private String serviceFqdnAttribute = "aws.services.route53.internal_csp_fqdn";
 
 }

@@ -3,6 +3,7 @@ package ch.admin.bit.jeap.openapi.publisher;
 import ch.admin.bit.jeap.openapi.archrepo.client.OpenApiArchitectureRepositoryService;
 import ch.admin.bit.jeap.openapi.reader.OpenApiSpecReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.info.GitProperties;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
+@RequiredArgsConstructor
 public class OpenApiSpecPublisher {
 
     static final String OPEN_API_SPEC_PUBLISHER_TASK_EXECUTOR = "openApiSpecPublisherTaskExecutor";
@@ -26,20 +28,7 @@ public class OpenApiSpecPublisher {
     private final BuildProperties buildProperties;
     private final GitProperties gitProperties;
     private final TracingTimer tracingTimer;
-
-    OpenApiSpecPublisher(String applicationName,
-                         OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService,
-                         OpenApiSpecReader openApiSpecReader,
-                         BuildProperties buildProperties,
-                         GitProperties gitProperties,
-                         TracingTimer tracingTimer) {
-        this.applicationName = applicationName;
-        this.openApiArchitectureRepositoryService = openApiArchitectureRepositoryService;
-        this.openApiSpecReader = openApiSpecReader;
-        this.buildProperties = buildProperties;
-        this.gitProperties = gitProperties;
-        this.tracingTimer = tracingTimer;
-    }
+    private final BaseServerUrlReplacer baseServerUrlReplacer;
 
     @Async(OPEN_API_SPEC_PUBLISHER_TASK_EXECUTOR)
     public CompletableFuture<Void> publishOpenApiSpecAsync() {
@@ -56,6 +45,7 @@ public class OpenApiSpecPublisher {
 
     void publishOpenApiSpec() throws JsonProcessingException {
         String openApiSpec = openApiSpecReader.readOpenApiSpec();
+        openApiSpec = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
         ByteArrayResource resource = getByteArrayResource(openApiSpec);
         openApiArchitectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
         log.info("Published OpenAPI specification successfully");
