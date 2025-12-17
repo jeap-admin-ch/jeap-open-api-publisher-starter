@@ -26,13 +26,17 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest(classes = OpenApiSpecPublisherTestApplication.class)
+@SpringBootTest(classes = OpenApiSpecPublisherTestApplication.class, properties = {
+        "jeap.archrepo.service-fqdn-property=test.fqdn",
+        "test.fqdn=test-app-fqdn.bit.admin.ch",
+        "server.servlet.context-path=/test-app"
+})
 @ActiveProfiles("test")
 @AutoConfigureObservability // To test the timed annotation on the publisher method
 @DirtiesContext
-class OpenApiSpecUploadIntegrationTest {
+class OpenApiSpecUploadBaseUrlReplacementIntegrationTest {
 
-    private static final String FILE_CONTENT = "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"},\"servers\":[{\"url\":\"http://localhost:8080/\",\"description\":\"Generated server url\"}],\"paths\":{},\"components\":{}}";
+    private static final String FILE_CONTENT = "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"},\"servers\":[{\"url\":\"https://test-app-fqdn.bit.admin.ch/test-app\",\"description\":\"Generated server url\"}],\"paths\":{},\"components\":{}}";
 
     @Autowired
     private MeterRegistry meterRegistry;
