@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.2] - 2025-12-17
+## [2.5.1] - 2025-12-17
 
 ### Changed
 - read the base server uri from the common configuration
+
+## [2.5.0] - 2025-12-17
+
+### Changed
+- Update parent from 5.16.4 to 5.16.5
+- update jeap-spring-boot-security-client-starter from 19.4.1 to 19.5.0
 
 ## [2.4.1] - 2025-12-16
 
