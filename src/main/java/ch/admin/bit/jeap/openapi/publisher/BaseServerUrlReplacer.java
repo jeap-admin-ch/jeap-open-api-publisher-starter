@@ -19,8 +19,8 @@ public class BaseServerUrlReplacer {
             return openApiSpec;
         }
         log.debug("Replacing server base URL in OpenAPI spec if a FQDN is configured");
-        String fqdn = this.environment.getProperty(archRepoProperties.getServiceFqdnAttribute());
-        log.info("Found FQDN '{}' for attribute '{}'", fqdn, archRepoProperties.getServiceFqdnAttribute());
+        String fqdn = this.environment.getProperty(archRepoProperties.getServiceFqdnProperty());
+        log.info("Found FQDN '{}' for attribute '{}'", fqdn, archRepoProperties.getServiceFqdnProperty());
         if (fqdn != null) {
             String baseServerUrl = "https://" + fqdn + contextPath;
             log.info("Replacing base server URL in OpenAPI spec with '{}'", baseServerUrl);

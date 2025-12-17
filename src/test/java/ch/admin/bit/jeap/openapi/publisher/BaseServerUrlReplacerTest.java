@@ -27,7 +27,7 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void replacesServerUrlWhenFqdnIsConfigured() {
-        when(archRepoProperties.getServiceFqdnAttribute()).thenReturn("internal.fqdn");
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
         when(environment.getProperty("internal.fqdn")).thenReturn("example.com");
         String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
 
@@ -38,7 +38,7 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void doesNotReplaceServerUrlWhenFqdnIsNotConfigured() {
-        when(archRepoProperties.getServiceFqdnAttribute()).thenReturn("internal.fqdn");
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
         when(environment.getProperty("internal.fqdn")).thenReturn(null);
         String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
 
@@ -49,7 +49,7 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void doesNotReplaceServerUrlWhenOriginalUrlIsNotPresent() {
-        when(archRepoProperties.getServiceFqdnAttribute()).thenReturn("internal.fqdn");
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
         when(environment.getProperty("internal.fqdn")).thenReturn("example.com");
         String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[]}";
 
@@ -60,7 +60,7 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void replacesServerUrlWithEmptyContextPath() {
-        when(archRepoProperties.getServiceFqdnAttribute()).thenReturn("internal.fqdn");
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
         baseServerUrlReplacer = new BaseServerUrlReplacer(environment, "", archRepoProperties);
         when(environment.getProperty("internal.fqdn")).thenReturn("example.com");
         String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";

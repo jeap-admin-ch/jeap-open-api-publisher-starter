@@ -37,10 +37,10 @@ public class ArchRepoProperties {
     private boolean replaceBaseServerUrl = true;
 
     /**
-     * Configuration attribute name for the FQDN of the service.
+     * Configuration property name for the FQDN of the service.
      * Used to replace the base server URL of the OpenAPI specification before publishing.
      * Default value is "aws.services.route53.internal_csp_fqdn".
      */
-    private String serviceFqdnAttribute = "aws.services.route53.internal_csp_fqdn";
+    private String serviceFqdnProperty = "aws.services.route53.internal_csp_fqdn";
 
 }
