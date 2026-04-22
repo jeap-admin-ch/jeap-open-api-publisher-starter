@@ -10,7 +10,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.annotation.DirtiesContext;
@@ -28,7 +28,7 @@ import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(classes = OpenApiSpecPublisherTestApplication.class)
 @ActiveProfiles("test")
-@AutoConfigureObservability // To test the timed annotation on the publisher method
+@AutoConfigureMetrics // To test the timed annotation on the publisher method
 @DirtiesContext
 class OpenApiSpecUploadIntegrationTest {
 
