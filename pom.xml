@@ -37,7 +37,7 @@
 
     <properties>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
-        <jeap-spring-boot-security-client-starter.version>22.0.0-alpha-springboot4</jeap-spring-boot-security-client-starter.version>
+        <jeap-spring-boot-security-client-starter.version>22.1.0-alpha-springboot4</jeap-spring-boot-security-client-starter.version>
         <maven.javadoc.skip>false</maven.javadoc.skip>
     </properties>
 
