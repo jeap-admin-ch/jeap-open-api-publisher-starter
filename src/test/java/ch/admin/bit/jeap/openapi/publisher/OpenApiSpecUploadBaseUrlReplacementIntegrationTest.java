@@ -20,6 +20,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -74,15 +75,17 @@ class OpenApiSpecUploadBaseUrlReplacementIntegrationTest {
     @Test
     @SneakyThrows
     void shouldUploadOpenApiSpecOnStartup() {
-        // Wait for async publication to complete (since it's triggered by ApplicationReadyEvent)
+        // Wait for async publication to fully complete. The timer is recorded as the last step of the
+        // async task (after the HTTP response returns), so waiting for it ensures both the wiremock
+        // request and the timer were recorded.
         await()
                 .atMost(Duration.ofSeconds(60))
-                .untilAsserted(() -> {
-                    var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-app")));
-                    assertThat(requests)
-                            .withFailMessage("Expected at least one API call to /api/openapi/test-app")
-                            .hasSizeGreaterThan(0);
-                });
+                .untilAsserted(() -> assertThat(findPublishTimer())
+                        .withFailMessage("Expected timer for jeap-publish-open-api to be recorded")
+                        .isPresent()
+                        .get()
+                        .extracting(Timer::count)
+                        .isEqualTo(1L));
 
         // Verify the request was made
         var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-app")));
@@ -107,12 +110,14 @@ class OpenApiSpecUploadBaseUrlReplacementIntegrationTest {
         // Verify that the task was indeed executed asynchronously
         Mockito.verify(threadPoolTaskExecutor, Mockito.times(1))
                 .execute(Mockito.any(Runnable.class));
+    }
 
-        Timer timer = (Timer) meterRegistry.getMeters().stream().filter(t -> t.getId().getName().contains("jeap-publish-open-api"))
-                .toList().getFirst();
-        assertThat(timer.count())
-                .withFailMessage("Expected timer for jeap-publish-open-api to be recorded")
-                .isOne();
+    private Optional<Timer> findPublishTimer() {
+        return meterRegistry.getMeters().stream()
+                .filter(t -> t.getId().getName().contains("jeap-publish-open-api"))
+                .filter(Timer.class::isInstance)
+                .map(Timer.class::cast)
+                .findFirst();
     }
 
     private static void mockOAuthTokenResponse() {

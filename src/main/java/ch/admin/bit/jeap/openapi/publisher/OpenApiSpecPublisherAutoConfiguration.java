@@ -1,10 +1,10 @@
 package ch.admin.bit.jeap.openapi.publisher;
 
-import brave.Tracer;
 import ch.admin.bit.jeap.openapi.archrepo.client.OpenApiArchitectureRepositoryService;
 import ch.admin.bit.jeap.openapi.reader.OpenApiSpecReader;
 import ch.admin.bit.jeap.security.restclient.OAuth2ClientCredentialsRestClientInitializer;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.tracing.Tracer;
 import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.webmvc.api.OpenApiResource;
 import org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration;
