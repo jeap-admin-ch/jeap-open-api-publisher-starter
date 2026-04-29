@@ -12,6 +12,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Switch tracing from Brave/Zipkin to Micrometer Tracing (OTel-compatible).
+- Updated jeap-spring-boot-security-client-starter from 22.2.0-alpha-springboot4 to 22.3.1-alpha-springboot4
 
 ## [5.2.0-alpha-springboot4] - 2026-04-24
 
