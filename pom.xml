@@ -27,7 +27,7 @@
 
     <artifactId>jeap-open-api-publisher-starter</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <version>5.4.0-alpha-springboot4-SNAPSHOT</version>
+    <version>5.5.0-alpha-springboot4-SNAPSHOT</version>
 
     <parent>
         <artifactId>jeap-internal-spring-boot-parent</artifactId>
@@ -37,7 +37,7 @@
 
     <properties>
         <springdoc-openapi.version>3.0.3</springdoc-openapi.version>
-        <jeap-spring-boot-security-client-starter.version>22.4.0-alpha-springboot4</jeap-spring-boot-security-client-starter.version>
+        <jeap-spring-boot-security-client-starter.version>22.5.0-alpha-springboot4</jeap-spring-boot-security-client-starter.version>
         <maven.javadoc.skip>false</maven.javadoc.skip>
     </properties>
 
