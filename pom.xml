@@ -27,7 +27,7 @@
 
     <artifactId>jeap-open-api-publisher-starter</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <version>5.5.1null</version>
+    <version>5.5.1-alpha-springboot4-SNAPSHOT</version>
 
     <parent>
         <artifactId>jeap-internal-spring-boot-parent</artifactId>
