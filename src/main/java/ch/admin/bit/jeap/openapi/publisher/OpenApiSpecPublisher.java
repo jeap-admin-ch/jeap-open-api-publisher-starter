@@ -10,6 +10,7 @@ import org.springframework.boot.info.GitProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Async;
 
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,22 +34,22 @@ public class OpenApiSpecPublisher {
     @Async(OPEN_API_SPEC_PUBLISHER_TASK_EXECUTOR)
     public CompletableFuture<Void> publishOpenApiSpecAsync() {
         return tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME, () -> {
-            try {
-                publishOpenApiSpec();
-                return CompletableFuture.completedFuture(null);
-            } catch (Exception e) {
-                log.error("Failed to publish OpenAPI spec", e);
-                return CompletableFuture.failedFuture(e);
-            }
+            publishOpenApiSpec();
+            return CompletableFuture.completedFuture(null);
         });
     }
 
-    void publishOpenApiSpec() throws JsonProcessingException {
-        String openApiSpec = openApiSpecReader.readOpenApiSpec();
-        openApiSpec = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
-        ByteArrayResource resource = getByteArrayResource(openApiSpec);
-        openApiArchitectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
-        log.info("Published OpenAPI specification successfully");
+    void publishOpenApiSpec() {
+        try {
+            String openApiSpec = openApiSpecReader.readOpenApiSpec();
+            openApiSpec = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
+            ByteArrayResource resource = getByteArrayResource(openApiSpec);
+            openApiArchitectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
+            log.info("Published OpenAPI specification successfully");
+        } catch (JsonProcessingException e) {
+            log.error("Failed to publish OpenAPI spec", e);
+            throw new UncheckedIOException("Failed to publish OpenAPI spec", e);
+        }
     }
 
     private ByteArrayResource getByteArrayResource(String openApiSpec) {

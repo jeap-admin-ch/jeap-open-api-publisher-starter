@@ -30,23 +30,32 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class OpenApiArchitectureRepositoryServiceTest {
 
     private static final String FILE_CONTENT = "my file content";
+    private static final String COMPONENT_NAME = "test-system-component";
+    private static final String COMPONENT_VERSION = "1.0.0";
+    private static final String API_PATH = "/api/openapi/test-system-component";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String EXPECTED_ONE_API_CALL = "Expected exactly one API call";
 
     static WireMockServer wireMockServer = new WireMockServer(wireMockConfig()
             .dynamicPort()
             .http2PlainDisabled(true));
 
-    @Autowired
-    private OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService;
+    private final OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService;
+
+    OpenApiArchitectureRepositoryServiceTest(@Autowired OpenApiArchitectureRepositoryService openApiArchitectureRepositoryService) {
+        this.openApiArchitectureRepositoryService = openApiArchitectureRepositoryService;
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         wireMockServer.start();
 
         // Set up mock API endpoint before Spring Boot starts
-        wireMockServer.stubFor(post(urlPathEqualTo("/api/openapi/test-system-component"))
+        wireMockServer.stubFor(post(urlPathEqualTo(API_PATH))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+                        .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
 
         registry.add("wiremock.port", () -> wireMockServer.port());
         registry.add("jeap.archrepo.url", () -> "http://localhost:" + wireMockServer.port());
@@ -71,23 +80,23 @@ class OpenApiArchitectureRepositoryServiceTest {
         ByteArrayResource byteArrayResource = getByteArrayResource();
 
         // Set up WireMock stub
-        wireMockServer.stubFor(post(urlPathEqualTo("/api/openapi/test-system-component"))
+        wireMockServer.stubFor(post(urlPathEqualTo(API_PATH))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
+                        .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
 
         // When
-        assertDoesNotThrow(() -> openApiArchitectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
+        assertDoesNotThrow(() -> openApiArchitectureRepositoryService.publishOpenApiSpec(COMPONENT_NAME, COMPONENT_VERSION, byteArrayResource));
 
         // Then
-        var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-system-component")));
+        var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo(API_PATH)));
         assertThat(requests)
-                .withFailMessage("Expected exactly one API call")
+                .withFailMessage(EXPECTED_ONE_API_CALL)
                 .hasSize(1);
 
         var request = requests.getFirst();
-        assertThat(request.getHeader("Content-Type")).startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
-        assertThat(request.getQueryParams().get("version").getValues().getFirst()).isEqualTo("1.0.0");
+        assertThat(request.getHeader(CONTENT_TYPE)).startsWith(MediaType.MULTIPART_FORM_DATA_VALUE);
+        assertThat(request.getQueryParams().get("version").getValues().getFirst()).isEqualTo(COMPONENT_VERSION);
 
         assertThat(request.getBodyAsString())
                 .contains("Content-Disposition: form-data; name=\"file\"; filename=\"unit-test-open-api-spec.json\"")
@@ -103,19 +112,19 @@ class OpenApiArchitectureRepositoryServiceTest {
         ByteArrayResource byteArrayResource = getByteArrayResource();
 
         // Set up WireMock stub for server error
-        wireMockServer.stubFor(post(urlPathEqualTo("/api/openapi/test-system-component"))
+        wireMockServer.stubFor(post(urlPathEqualTo(API_PATH))
                 .willReturn(aResponse()
                         .withStatus(500)
-                        .withHeader("Content-Type", "application/json")));
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)));
 
         // When & Then
         assertThrows(HttpServerErrorException.class,
-                () -> openApiArchitectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
+                () -> openApiArchitectureRepositoryService.publishOpenApiSpec(COMPONENT_NAME, COMPONENT_VERSION, byteArrayResource));
 
         // Verify request was made
-        var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-system-component")));
+        var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo(API_PATH)));
         assertThat(requests)
-                .withFailMessage("Expected exactly one API call")
+                .withFailMessage(EXPECTED_ONE_API_CALL)
                 .hasSize(1);
     }
 
@@ -125,18 +134,18 @@ class OpenApiArchitectureRepositoryServiceTest {
         ByteArrayResource byteArrayResource = getByteArrayResource();
 
         // Set up WireMock stub for client error
-        wireMockServer.stubFor(post(urlPathEqualTo("/api/openapi/test-system-component"))
+        wireMockServer.stubFor(post(urlPathEqualTo(API_PATH))
                 .willReturn(aResponse()
                         .withStatus(400)
-                        .withHeader("Content-Type", "application/json")));
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)));
 
         // When & Then
-        assertThrows(HttpClientErrorException.class, () -> openApiArchitectureRepositoryService.publishOpenApiSpec("test-system-component", "1.0.0", byteArrayResource));
+        assertThrows(HttpClientErrorException.class, () -> openApiArchitectureRepositoryService.publishOpenApiSpec(COMPONENT_NAME, COMPONENT_VERSION, byteArrayResource));
 
         // Verify request was made
-        var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo("/api/openapi/test-system-component")));
+        var requests = wireMockServer.findAll(postRequestedFor(urlPathEqualTo(API_PATH)));
         assertThat(requests)
-                .withFailMessage("Expected exactly one API call")
+                .withFailMessage(EXPECTED_ONE_API_CALL)
                 .hasSize(1);
     }
 
@@ -145,7 +154,7 @@ class OpenApiArchitectureRepositoryServiceTest {
         wireMockServer.stubFor(post(urlEqualTo("/oauth/token"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody("{\"access_token\":\"test-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}")));
     }
 

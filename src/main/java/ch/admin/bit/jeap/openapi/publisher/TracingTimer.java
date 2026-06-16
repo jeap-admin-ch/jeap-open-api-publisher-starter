@@ -32,13 +32,14 @@ class TracingTimer {
     CompletableFuture<Void> traceAndTime(String spanName, String timerName, Supplier<CompletableFuture<Void>> action) {
         Span span = (tracer != null) ? tracer.nextSpan().name(spanName).start() : null;
         Timer.Sample sample = (meterRegistry != null) ? Timer.start(meterRegistry) : null;
+        Tracer.SpanInScope spanInScope = (span != null) ? tracer.withSpan(span) : null;
 
-        try (Tracer.SpanInScope ignored = (span != null) ? tracer.withSpan(span) : null) {
+        try (spanInScope) {
             return action.get().whenComplete((result, ex) -> safelyRecordCompletion(timerName, sample, span, ex));
-        } catch (Throwable ex) {
+        } catch (Exception | AssertionError ex) {
             // action.get() threw synchronously instead of returning a failed future — record on the timer and span
-            // before propagating, otherwise the started span and sample would leak. Catch Throwable so Errors are
-            // cleaned up too; only unchecked exceptions can escape the try block, so the rethrow is a precise
+            // before propagating, otherwise the started span and sample would leak.
+            // only unchecked exceptions can escape the try block, so the rethrow is a precise
             // rethrow and does not require a `throws` declaration.
             safelyRecordCompletion(timerName, sample, span, ex);
             throw ex;
@@ -48,7 +49,7 @@ class TracingTimer {
     private void safelyRecordCompletion(String timerName, Timer.Sample sample, Span span, Throwable original) {
         try {
             recordCompletion(timerName, sample, span, original);
-        } catch (RuntimeException | Error cleanupEx) {
+        } catch (RuntimeException | AssertionError cleanupEx) {
             // A failure in metrics/tracing recording must never mask the original operation failure. Attach it as
             // suppressed so it remains visible. If there is no original failure (success path), propagate the
             // recording failure so the caller learns about it.

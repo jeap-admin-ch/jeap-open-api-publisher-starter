@@ -13,6 +13,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BaseServerUrlReplacerTest {
 
+    private static final String INTERNAL_FQDN_PROPERTY = "internal.fqdn";
+    private static final String EXAMPLE_COM = "example.com";
+    private static final String OPENAPI_WITH_LOCALHOST_SERVER = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
+
     @Mock
     private Environment environment;
     @Mock
@@ -27,9 +31,9 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void replacesServerUrlWhenFqdnIsConfigured() {
-        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
-        when(environment.getProperty("internal.fqdn")).thenReturn("example.com");
-        String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn(INTERNAL_FQDN_PROPERTY);
+        when(environment.getProperty(INTERNAL_FQDN_PROPERTY)).thenReturn(EXAMPLE_COM);
+        String openApiSpec = OPENAPI_WITH_LOCALHOST_SERVER;
 
         String result = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
 
@@ -38,9 +42,9 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void doesNotReplaceServerUrlWhenFqdnIsNotConfigured() {
-        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
-        when(environment.getProperty("internal.fqdn")).thenReturn(null);
-        String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn(INTERNAL_FQDN_PROPERTY);
+        when(environment.getProperty(INTERNAL_FQDN_PROPERTY)).thenReturn(null);
+        String openApiSpec = OPENAPI_WITH_LOCALHOST_SERVER;
 
         String result = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
 
@@ -49,8 +53,8 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void doesNotReplaceServerUrlWhenOriginalUrlIsNotPresent() {
-        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
-        when(environment.getProperty("internal.fqdn")).thenReturn("example.com");
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn(INTERNAL_FQDN_PROPERTY);
+        when(environment.getProperty(INTERNAL_FQDN_PROPERTY)).thenReturn(EXAMPLE_COM);
         String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[]}";
 
         String result = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
@@ -60,10 +64,10 @@ class BaseServerUrlReplacerTest {
 
     @Test
     void replacesServerUrlWithEmptyContextPath() {
-        when(archRepoProperties.getServiceFqdnProperty()).thenReturn("internal.fqdn");
+        when(archRepoProperties.getServiceFqdnProperty()).thenReturn(INTERNAL_FQDN_PROPERTY);
         baseServerUrlReplacer = new BaseServerUrlReplacer(environment, "", archRepoProperties);
-        when(environment.getProperty("internal.fqdn")).thenReturn("example.com");
-        String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
+        when(environment.getProperty(INTERNAL_FQDN_PROPERTY)).thenReturn(EXAMPLE_COM);
+        String openApiSpec = OPENAPI_WITH_LOCALHOST_SERVER;
 
         String result = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
 
@@ -73,7 +77,7 @@ class BaseServerUrlReplacerTest {
     @Test
     void doesNotReplaceServerUrlWhenReplaceBaseServerUrlIsFalse() {
         when(archRepoProperties.isReplaceBaseServerUrl()).thenReturn(false);
-        String openApiSpec = "{\"openapi\":\"3.1.0\",\"info\":{},\"servers\":[{\"url\":\"http://localhost:8080/\"}]}";
+        String openApiSpec = OPENAPI_WITH_LOCALHOST_SERVER;
 
         String result = baseServerUrlReplacer.replaceServerUrl(openApiSpec);
 

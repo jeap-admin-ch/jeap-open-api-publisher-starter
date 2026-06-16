@@ -35,11 +35,14 @@ class OpenApiSpecUploadIntegrationTest {
 
     private static final String FILE_CONTENT = "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"},\"servers\":[{\"url\":\"http://localhost:8080/\",\"description\":\"Generated server url\"}],\"paths\":{},\"components\":{}}";
 
-    @Autowired
-    private MeterRegistry meterRegistry;
+    private final MeterRegistry meterRegistry;
 
     @MockitoSpyBean(name = OpenApiSpecPublisher.OPEN_API_SPEC_PUBLISHER_TASK_EXECUTOR)
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+
+    OpenApiSpecUploadIntegrationTest(@Autowired MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
 
     static WireMockServer wireMockServer = new WireMockServer(wireMockConfig()
             .dynamicPort()

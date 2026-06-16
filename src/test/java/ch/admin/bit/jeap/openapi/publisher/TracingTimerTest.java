@@ -27,10 +27,12 @@ class TracingTimerTest {
 
     private static final String SPAN_NAME = "publish-openapi-spec";
     private static final String TIMER_NAME = "jeap-publish-openapi-spec";
+    private static final String STATUS = "status";
+    private static final String ERROR = "error";
+    private static final String REGISTRY_BLEW_UP = "registry blew up";
 
     private Tracer tracer;
     private Span span;
-    private Tracer.SpanInScope spanInScope;
     private MeterRegistry meterRegistry;
     private TracingTimer tracingTimer;
 
@@ -38,7 +40,7 @@ class TracingTimerTest {
     void setUp() {
         tracer = mock(Tracer.class);
         span = mock(Span.class);
-        spanInScope = mock(Tracer.SpanInScope.class);
+        Tracer.SpanInScope spanInScope = mock(Tracer.SpanInScope.class);
         when(tracer.nextSpan()).thenReturn(span);
         when(span.name(SPAN_NAME)).thenReturn(span);
         when(span.start()).thenReturn(span);
@@ -63,18 +65,18 @@ class TracingTimerTest {
     }
 
     @Test
-    void traceAndTime_endsSpanWithoutError_whenFutureCompletesSuccessfully() {
+    void traceAndTimeEndsSpanWithoutErrorWhenFutureCompletesSuccessfully() {
         CompletableFuture<Void> result = tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME,
                 () -> CompletableFuture.completedFuture(null));
 
         assertThat(result).isCompleted();
         verify(span, never()).error(any());
         verify(span).end();
-        assertThat(meterRegistry.find(TIMER_NAME).tag("status", "success").timer().count()).isOne();
+        assertThat(meterRegistry.find(TIMER_NAME).tag(STATUS, "success").timer().count()).isOne();
     }
 
     @Test
-    void traceAndTime_marksSpanAsErrorBeforeEnding_whenFutureCompletesExceptionally() {
+    void traceAndTimeMarksSpanAsErrorBeforeEndingWhenFutureCompletesExceptionally() {
         RuntimeException failure = new RuntimeException("boom");
 
         CompletableFuture<Void> result = tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME,
@@ -84,11 +86,11 @@ class TracingTimerTest {
         InOrder order = inOrder(span);
         order.verify(span).error(failure);
         order.verify(span).end();
-        assertThat(meterRegistry.find(TIMER_NAME).tag("status", "error").timer().count()).isOne();
+        assertThat(meterRegistry.find(TIMER_NAME).tag(STATUS, ERROR).timer().count()).isOne();
     }
 
     @Test
-    void traceAndTime_marksSpanAsErrorBeforeEnding_whenSupplierThrowsSynchronously() {
+    void traceAndTimeMarksSpanAsErrorBeforeEndingWhenSupplierThrowsSynchronously() {
         RuntimeException failure = new RuntimeException("supplier blew up");
 
         assertThatThrownBy(() -> tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME, () -> {
@@ -99,11 +101,11 @@ class TracingTimerTest {
         InOrder order = inOrder(span);
         order.verify(span).error(failure);
         order.verify(span).end();
-        assertThat(meterRegistry.find(TIMER_NAME).tag("status", "error").timer().count()).isOne();
+        assertThat(meterRegistry.find(TIMER_NAME).tag(STATUS, ERROR).timer().count()).isOne();
     }
 
     @Test
-    void traceAndTime_doesNotEndSpan_beforeAsyncFutureCompletes() {
+    void traceAndTimeDoesNotEndSpanBeforeAsyncFutureCompletes() {
         CompletableFuture<Void> pending = new CompletableFuture<>();
 
         CompletableFuture<Void> result = tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME, () -> pending);
@@ -120,12 +122,14 @@ class TracingTimerTest {
     }
 
     @Test
-    void traceAndTime_endsSpan_evenWhenMetricsRecordingThrows() {
-        RuntimeException registryFailure = new RuntimeException("registry blew up");
+    void traceAndTimeEndsSpanEvenWhenMetricsRecordingThrows() {
+        RuntimeException registryFailure = new RuntimeException(REGISTRY_BLEW_UP);
         TracingTimer timer = new TracingTimer(tracer, brokenRegistry(TIMER_NAME, registryFailure));
 
-        assertThatThrownBy(() -> timer.traceAndTime(SPAN_NAME, TIMER_NAME,
-                () -> CompletableFuture.completedFuture(null)).join())
+        CompletableFuture<Void> result = timer.traceAndTime(SPAN_NAME, TIMER_NAME,
+                () -> CompletableFuture.completedFuture(null));
+
+        assertThatThrownBy(result::join)
                 .isInstanceOf(CompletionException.class)
                 .hasCause(registryFailure);
 
@@ -133,9 +137,9 @@ class TracingTimerTest {
     }
 
     @Test
-    void traceAndTime_preservesOriginalSyncFailure_andAddsMetricsFailureAsSuppressed() {
+    void traceAndTimePreservesOriginalSyncFailureAndAddsMetricsFailureAsSuppressed() {
         RuntimeException supplierFailure = new RuntimeException("supplier blew up");
-        RuntimeException registryFailure = new RuntimeException("registry blew up");
+        RuntimeException registryFailure = new RuntimeException(REGISTRY_BLEW_UP);
         TracingTimer timer = new TracingTimer(tracer, brokenRegistry(TIMER_NAME, registryFailure));
 
         assertThatThrownBy(() -> timer.traceAndTime(SPAN_NAME, TIMER_NAME, () -> {
@@ -150,9 +154,9 @@ class TracingTimerTest {
     }
 
     @Test
-    void traceAndTime_preservesOriginalAsyncFailure_andAddsMetricsFailureAsSuppressed() {
+    void traceAndTimePreservesOriginalAsyncFailureAndAddsMetricsFailureAsSuppressed() {
         RuntimeException futureFailure = new RuntimeException("future blew up");
-        RuntimeException registryFailure = new RuntimeException("registry blew up");
+        RuntimeException registryFailure = new RuntimeException(REGISTRY_BLEW_UP);
         TracingTimer timer = new TracingTimer(tracer, brokenRegistry(TIMER_NAME, registryFailure));
 
         CompletableFuture<Void> result = timer.traceAndTime(SPAN_NAME, TIMER_NAME,
@@ -167,7 +171,7 @@ class TracingTimerTest {
     }
 
     @Test
-    void traceAndTime_cleansUpSpan_whenSupplierThrowsError() {
+    void traceAndTimeCleansUpSpanWhenSupplierThrowsError() {
         Error supplierFailure = new AssertionError("error from supplier");
 
         assertThatThrownBy(() -> tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME, () -> {
@@ -179,11 +183,11 @@ class TracingTimerTest {
         InOrder order = inOrder(span);
         order.verify(span).error(supplierFailure);
         order.verify(span).end();
-        assertThat(meterRegistry.find(TIMER_NAME).tag("status", "error").timer().count()).isOne();
+        assertThat(meterRegistry.find(TIMER_NAME).tag(STATUS, ERROR).timer().count()).isOne();
     }
 
     @Test
-    void traceAndTime_returnsCompletedFutureAndDoesNotCrash_whenTracerAndRegistryAreNull() throws ExecutionException, InterruptedException {
+    void traceAndTimeReturnsCompletedFutureAndDoesNotCrashWhenTracerAndRegistryAreNull() throws ExecutionException, InterruptedException {
         TracingTimer noOpTimer = new TracingTimer(null, null);
 
         CompletableFuture<Void> result = noOpTimer.traceAndTime(SPAN_NAME, TIMER_NAME,
@@ -194,7 +198,7 @@ class TracingTimerTest {
     }
 
     @Test
-    void traceAndTime_propagatesFailure_whenTracerAndRegistryAreNull() {
+    void traceAndTimePropagatesFailureWhenTracerAndRegistryAreNull() {
         TracingTimer noOpTimer = new TracingTimer(null, null);
         RuntimeException failure = new RuntimeException("boom");
 
