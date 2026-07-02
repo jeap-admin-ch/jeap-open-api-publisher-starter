@@ -46,7 +46,7 @@ Jenkinsfile, publiccode.yml, CHANGELOG.md, LICENSE
 
 - Java packages live under `ch.admin.bit.jeap.openapi.*`.
 - Configuration properties use the prefix `jeap.archrepo.*` (see `ArchRepoProperties`).
-- Auto-configuration is registered via `@AutoConfiguration` and
+- Autoconfiguration is registered via `@AutoConfiguration` and
   `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`.
 - The publisher only activates when an `OpenApiResource` bean is present (springdoc) and
   `jeap.archrepo.enabled` is not `false`; the archrepo HTTP client is only created when
@@ -56,8 +56,11 @@ Jenkinsfile, publiccode.yml, CHANGELOG.md, LICENSE
 
 ## Docs
 
-When changing public behaviour, update the matching focused file under [docs/](docs/) (one topic per
+When changing public behavior, update the matching focused file under [docs/](docs/) (one topic per
 file) and the documentation index in the README.
+
+Validate that files under docs/*.md are valid MDX Markdown, compatible with a Docusaurus site. Also, make sure
+mermaid diagrams in the Markdown files use correct Mermaid syntax.
 
 ## Versioning
 

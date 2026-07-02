@@ -11,24 +11,58 @@ and uploads it on every application start, without any code changes in the consu
 * Optional replacement of the OpenAPI base server URL with the service's deployment FQDN
 * Optional Micrometer tracing and timing of the publish operation
 
+```mermaid
+flowchart LR
+    subgraph MS["Microservice"]
+        direction TB
+
+        subgraph PUB["jeap-open-api-publisher"]
+            direction TB
+            TRIGGER["ApplicationReadyEvent listener"]
+            ASYNC["Async OpenAPI upload task"]
+            TRIGGER -.->|"starts asynchronously"| ASYNC
+        end
+    end
+
+    subgraph AR["ArchRepo Service"]
+        direction TB
+        DOC["Rest API Documentation"]
+    end
+
+    AUTH["Authorization Server"]
+
+    ASYNC -->|"Upload OpenAPI specification"| DOC
+    ASYNC -->|"Get OAuth2 token"| AUTH
+    DOC -->|"Validate OAuth2 access"| AUTH
+
+%% Colors
+    classDef service fill:#F9CC9D,stroke:#333,stroke-width:2px,color:#000;
+    classDef component fill:#9FC5E8,stroke:#333,stroke-width:2px,color:#000;
+    classDef auth fill:#F9CC9D,stroke:#333,stroke-width:2px,color:#000;
+
+    class MS,AR service;
+    class PUB,TRIGGER,ASYNC,DOC component;
+    class AUTH auth;
+```
+
 ## Documentation
 
 Start with [Getting started](docs/getting-started.md), then follow the links below.
 
-| Topic                                          | File                                             |
-|------------------------------------------------|--------------------------------------------------|
+| Topic                                           | File                                               |
+|-------------------------------------------------|----------------------------------------------------|
 | Getting started (add the dependency, enable it) | [docs/getting-started.md](docs/getting-started.md) |
-| How it works (startup & publish flow)          | [docs/how-it-works.md](docs/how-it-works.md)     |
-| Configuration reference (`jeap.archrepo.*`)    | [docs/configuration.md](docs/configuration.md)   |
-| Authentication (OAuth2 client credentials)     | [docs/authentication.md](docs/authentication.md) |
+| How it works (startup & publish flow)           | [docs/how-it-works.md](docs/how-it-works.md)       |
+| Configuration reference (`jeap.archrepo.*`)     | [docs/configuration.md](docs/configuration.md)     |
+| Authentication (OAuth2 client credentials)      | [docs/authentication.md](docs/authentication.md)   |
 
 ## Modules
 
 This is a single-module Spring Boot starter. The artifact to depend on is `jeap-open-api-publisher-starter`;
 group id is `ch.admin.bit.jeap`, and the version is managed by the jEAP Spring Boot parent.
 
-| Artifact                          | Purpose                                                                                  |
-|-----------------------------------|------------------------------------------------------------------------------------------|
+| Artifact                          | Purpose                                                                                     |
+|-----------------------------------|---------------------------------------------------------------------------------------------|
 | `jeap-open-api-publisher-starter` | Auto-configuration that reads and uploads the OpenAPI specification to the archrepo service |
 
 ## Changes
@@ -38,7 +72,8 @@ This library is versioned using [Semantic Versioning](http://semver.org/) and al
 
 ## Note
 
-This repository is part the open source distribution of jEAP. See [github.com/jeap-admin-ch/jeap](https://github.com/jeap-admin-ch/jeap)
+This repository is part the open source distribution of jEAP.
+See [github.com/jeap-admin-ch/jeap](https://github.com/jeap-admin-ch/jeap)
 for more information.
 
 ## License
