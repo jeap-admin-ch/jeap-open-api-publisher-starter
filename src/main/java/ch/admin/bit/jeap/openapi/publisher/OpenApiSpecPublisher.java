@@ -31,6 +31,7 @@ public class OpenApiSpecPublisher {
     private final TracingTimer tracingTimer;
     private final BaseServerUrlReplacer baseServerUrlReplacer;
 
+    @SuppressWarnings("UnusedReturnValue")
     @Async(OPEN_API_SPEC_PUBLISHER_TASK_EXECUTOR)
     public CompletableFuture<Void> publishOpenApiSpecAsync() {
         return tracingTimer.traceAndTime(SPAN_NAME, TIMER_NAME, () -> {
@@ -46,9 +47,9 @@ public class OpenApiSpecPublisher {
             ByteArrayResource resource = getByteArrayResource(openApiSpec);
             openApiArchitectureRepositoryService.publishOpenApiSpec(applicationName, getAppVersion(), resource);
             log.info("Published OpenAPI specification successfully");
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error("Failed to publish OpenAPI spec", e);
-            throw new UncheckedIOException("Failed to publish OpenAPI spec", e);
+            throw new OpenApiPublishingException("Failed to publish OpenAPI spec", e);
         }
     }
 
