@@ -36,7 +36,7 @@
     </parent>
 
     <properties>
-        <jeap-spring-boot-security-client-starter.version>24.12.0</jeap-spring-boot-security-client-starter.version>
+        <jeap-spring-boot-security-client-starter.version>24.14.0</jeap-spring-boot-security-client-starter.version>
         <maven.javadoc.skip>false</maven.javadoc.skip>
     </properties>
 
