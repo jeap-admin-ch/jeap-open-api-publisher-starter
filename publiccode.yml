@@ -1,8 +1,8 @@
 publiccodeYmlVersion: 0.4.0
 name: jeap-open-api-publisher-starter
 applicationSuite: jEAP
-softwareVersion: 7.25.0
-releaseDate: 2026-09-02
+softwareVersion: 7.26.0
+releaseDate: 2026-09-03
 url: "https://github.com/jeap-admin-ch/jeap-open-api-publisher-starter.git"
 landingURL: "https://github.com/jeap-admin-ch/jeap"
 platforms:
