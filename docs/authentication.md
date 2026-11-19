@@ -44,8 +44,8 @@ The OAuth2 client must be granted the archrepo role that authorizes writing Open
 <arch-repo-system-name>_@openapidoc_#write
 ```
 
-Replace `<arch-repo-system-name>` with the system name of the target architecture repository. See the
-archrepo [Rest API Documentation](https://confluence.bit.admin.ch/display/JEAP/Rest+API+Documentation)
+Replace `<arch-repo-system-name>` with the system name of the target architecture repository. See
+[Document a REST API with OpenAPI](https://jeap-admin-ch.github.io/docs/how-tos/rest-apis-and-web/document-a-rest-api-with-openapi)
 for details.
 
 ## Related
